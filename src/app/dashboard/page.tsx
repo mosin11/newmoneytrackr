@@ -112,7 +112,7 @@ function DashboardContent() {
         calculateSummary(data.transactions)
         
         // Extract unique categories
-        const categories = [...new Set(data.transactions.map((t: Transaction) => t.category))]
+        const categories = [...new Set(data.transactions.map((t: Transaction) => t.category))] as string[]
         setAvailableCategories(categories)
         
         // Fetch budgets and savings goals for health score
