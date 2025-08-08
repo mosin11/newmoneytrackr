@@ -1,4 +1,5 @@
 import Link from "next/link"
+import Image from "next/image"
 import { Wallet } from "lucide-react"
 
 export default function Footer() {
@@ -7,9 +8,13 @@ export default function Footer() {
       <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6 sm:py-6 lg:px-8">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-2 sm:gap-3">
-            <div className="h-5 w-5 sm:h-6 sm:w-6 rounded bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-              <Wallet className="h-3 w-3 sm:h-4 sm:w-4 text-white" />
-            </div>
+            <Image 
+              src="/logo.png" 
+              alt="MoneyTrackr Logo" 
+              width={24} 
+              height={24} 
+              className="h-5 w-5 sm:h-6 sm:w-6"
+            />
             <span className="text-sm sm:text-base font-semibold text-gradient-primary">MoneyTrackr</span>
           </div>
           
