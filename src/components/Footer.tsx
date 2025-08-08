@@ -22,7 +22,7 @@ export default function Footer() {
                 Terms
               </Link>
             </div>
-            <span className="text-center">© 2024 MoneyTrackr</span>
+            <span className="text-center">© {new Date().getFullYear()} MoneyTrackr</span>
           </div>
         </div>
       </div>
