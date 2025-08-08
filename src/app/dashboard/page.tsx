@@ -1,11 +1,8 @@
 "use client"
 
 import { useState, useEffect } from "react"
-import { format, startOfMonth, endOfMonth, subMonths, addMonths } from "date-fns"
+import { startOfMonth, endOfMonth, subMonths } from "date-fns"
 import {
-  PlusCircle,
-  FileText,
-  FileSpreadsheet,
   Loader2,
   TrendingUp,
   TrendingDown,
@@ -16,18 +13,14 @@ import {
 import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { TransactionForm } from "@/components/dashboard/TransactionForm"
+
 import { TransactionList } from "@/components/dashboard/TransactionList"
-import { DateRangePicker } from "@/components/dashboard/DateRangePicker"
+
 import { TransactionSearch } from "@/components/dashboard/TransactionSearch"
-import { RecurringManager } from "@/components/dashboard/RecurringManager"
-import { ExportManager } from "@/components/dashboard/ExportManager"
-import { ReminderManager } from "@/components/dashboard/ReminderManager"
-import { SavingsGoals } from "@/components/dashboard/SavingsGoals"
+
 import { FinancialHealthScore } from "@/components/dashboard/FinancialHealthScore"
 import { CashFlowPieChart } from "@/components/dashboard/CashFlowPieChart"
-import { MonthlyBarChart } from "@/components/dashboard/MonthlyBarChart"
-import { ExpenseSubcategoryChart } from "@/components/dashboard/ExpenseSubcategoryChart"
+
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { useLoader } from "@/components/ui/loader"
 import { useToast } from "@/components/ui/toast"
@@ -80,7 +73,6 @@ function DashboardContent() {
   })
   const [loading, setLoading] = useState(true)
   const [filter, setFilter] = useState('all')
-  const [showTransactionForm, setShowTransactionForm] = useState(false)
   const [showCharts, setShowCharts] = useState(false)
   const [searchFilters, setSearchFilters] = useState({
     search: '',
@@ -92,8 +84,8 @@ function DashboardContent() {
   })
   const [filteredTransactions, setFilteredTransactions] = useState<Transaction[]>([])
   const [availableCategories, setAvailableCategories] = useState<string[]>([])
-  const [budgets, setBudgets] = useState<any[]>([])
-  const [savingsGoals, setSavingsGoals] = useState<any[]>([])
+  const [budgets, setBudgets] = useState<unknown[]>([])
+  const [savingsGoals, setSavingsGoals] = useState<unknown[]>([])
   const [activeFilter, setActiveFilter] = useState<'all' | 'in' | 'out'>('all')
   const { setLoading: setGlobalLoading } = useLoader()
   const { showToast } = useToast()
@@ -291,7 +283,7 @@ function DashboardContent() {
             Welcome back, {user.name}!
           </h1>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-1 sm:mt-2">
-            Here's your financial overview
+            Here&apos;s your financial overview
           </p>
         </div>
         

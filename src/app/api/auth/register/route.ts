@@ -38,14 +38,14 @@ export async function POST(request: NextRequest) {
       email: validatedData.email 
     })
     
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('Register API Error:', error)
-    if (error.name === 'ZodError') {
-      return NextResponse.json({ error: error.errors[0].message }, { status: 400 })
+    if (error && typeof error === 'object' && 'name' in error && error.name === 'ZodError') {
+      return NextResponse.json({ error: (error as any).errors[0].message }, { status: 400 })
     }
     return NextResponse.json({ 
       error: 'Internal server error',
-      details: error.message 
+      details: error instanceof Error ? error.message : 'Unknown error'
     }, { status: 500 })
   }
 }
