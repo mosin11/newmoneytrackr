@@ -24,7 +24,7 @@ import { CashFlowPieChart } from "@/components/dashboard/CashFlowPieChart"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
 import { useLoader } from "@/components/ui/loader"
 import { useToast } from "@/components/ui/toast"
-import { DebugInfo } from "@/components/DebugInfo"
+
 
 interface User {
   id: string
@@ -510,12 +510,7 @@ function DashboardContent() {
           </Card>
         </div>
         
-        <DebugInfo 
-          user={user}
-          transactions={filteredTransactions}
-          budgets={budgets}
-          savingsGoals={savingsGoals}
-        />
+
       </div>
     </div>
   )
