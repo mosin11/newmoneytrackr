@@ -1,26 +1,68 @@
 "use client"
 
-import { PieChart, Pie, Cell, ResponsiveContainer, Legend, Tooltip } from 'recharts'
+import { useEffect, useRef } from 'react'
 
 interface CashFlowPieChartProps {
   data: { category: string; amount: number }[]
-  type: 'in' | 'out'
+  type: 'in' | 'out' | 'overview'
 }
 
-const CATEGORY_COLORS = {
-  'Food & Dining': '#ff6b6b',
-  'Transportation': '#4ecdc4',
-  'Healthcare': '#45b7d1',
-  'Shopping': '#96ceb4',
-  'Personal Care': '#ffeaa7',
-  'Bills & EMI': '#dda0dd',
-  'Investment': '#98d8c8',
-  'Income': '#6c5ce7',
-  'Transfer': '#fd79a8',
-  'Other Expense': '#fdcb6e'
-}
+const CATEGORY_COLORS = [
+  '#22c55e', '#ef4444', '#45b7d1', '#96ceb4', '#ffeaa7', 
+  '#dda0dd', '#98d8c8', '#6c5ce7', '#fd79a8', '#fdcb6e'
+]
 
 export function CashFlowPieChart({ data, type }: CashFlowPieChartProps) {
+  const canvasRef = useRef<HTMLCanvasElement>(null)
+
+  useEffect(() => {
+    if (!canvasRef.current || !data || data.length === 0) return
+
+    const canvas = canvasRef.current
+    const ctx = canvas.getContext('2d')
+    if (!ctx) return
+
+    // Clear canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height)
+
+    const centerX = canvas.width / 2
+    const centerY = canvas.height / 2
+    const radius = Math.min(centerX, centerY) - 60
+
+    const total = data.reduce((sum, item) => sum + item.amount, 0)
+    let currentAngle = -Math.PI / 2
+
+    // Draw pie slices
+    data.forEach((item, index) => {
+      const sliceAngle = (item.amount / total) * 2 * Math.PI
+      const color = CATEGORY_COLORS[index % CATEGORY_COLORS.length]
+
+      // Draw slice
+      ctx.beginPath()
+      ctx.moveTo(centerX, centerY)
+      ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle)
+      ctx.closePath()
+      ctx.fillStyle = color
+      ctx.fill()
+      ctx.strokeStyle = '#fff'
+      ctx.lineWidth = 2
+      ctx.stroke()
+
+      // Draw labels
+      const labelAngle = currentAngle + sliceAngle / 2
+      const labelX = centerX + Math.cos(labelAngle) * (radius * 0.7)
+      const labelY = centerY + Math.sin(labelAngle) * (radius * 0.7)
+      const percentage = ((item.amount / total) * 100).toFixed(0)
+
+      ctx.fillStyle = '#fff'
+      ctx.font = 'bold 12px Arial'
+      ctx.textAlign = 'center'
+      ctx.fillText(`${percentage}%`, labelX, labelY)
+
+      currentAngle += sliceAngle
+    })
+  }, [data])
+
   if (!data || data.length === 0) {
     return (
       <div className="flex items-center justify-center h-64 text-gray-500 dark:text-gray-400">
@@ -41,30 +83,34 @@ export function CashFlowPieChart({ data, type }: CashFlowPieChartProps) {
   }
 
   return (
-    <div className="w-full overflow-hidden">
-      <ResponsiveContainer width="100%" height={300}>
-      <PieChart>
-        <Pie
-          data={data}
-          cx="50%"
-          cy="50%"
-          labelLine={false}
-          label={({ category, percent }) => `${category} ${(percent * 100).toFixed(0)}%`}
-          outerRadius={80}
-          fill="#8884d8"
-          dataKey="amount"
-        >
-          {data.map((entry, index) => (
-            <Cell 
-              key={`cell-${index}`} 
-              fill={CATEGORY_COLORS[entry.category as keyof typeof CATEGORY_COLORS] || '#74b9ff'} 
-            />
-          ))}
-        </Pie>
-        <Tooltip formatter={(value) => formatCurrency(Number(value))} />
-        <Legend />
-      </PieChart>
-      </ResponsiveContainer>
+    <div className="w-full">
+      <canvas 
+        ref={canvasRef} 
+        width={400} 
+        height={300} 
+        className="w-full h-auto max-w-md mx-auto"
+      />
+      
+      {/* Legend */}
+      <div className="mt-4 grid grid-cols-2 gap-2 text-sm">
+        {data.map((item, index) => {
+          const percentage = ((item.amount / data.reduce((sum, d) => sum + d.amount, 0)) * 100).toFixed(1)
+          return (
+            <div key={item.category} className="flex items-center gap-2">
+              <div 
+                className="w-4 h-4 rounded-sm flex-shrink-0" 
+                style={{ backgroundColor: CATEGORY_COLORS[index % CATEGORY_COLORS.length] }}
+              />
+              <div className="flex-1 min-w-0">
+                <div className="font-medium truncate">{item.category}</div>
+                <div className="text-xs text-gray-600">
+                  {formatCurrency(item.amount)} ({percentage}%)
+                </div>
+              </div>
+            </div>
+          )
+        })}
+      </div>
     </div>
   )
 }

@@ -468,10 +468,16 @@ function DashboardContent() {
             <div className="grid gap-4 sm:gap-6 grid-cols-1 lg:grid-cols-2 w-full">
               <Card>
                 <CardHeader>
-                  <CardTitle>Income by Category</CardTitle>
+                  <CardTitle>Income vs Expenses</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  <CashFlowPieChart data={summary.incomeByCategory} type="in" />
+                  <CashFlowPieChart 
+                    data={[
+                      { category: 'Income', amount: summary.totalIn },
+                      { category: 'Expenses', amount: summary.totalOut }
+                    ]} 
+                    type="overview" 
+                  />
                 </CardContent>
               </Card>
               

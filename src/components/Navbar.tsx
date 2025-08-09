@@ -20,13 +20,11 @@ interface User {
 export default function Navbar() {
   const [user, setUser] = useState<User | null>(null)
   const [migrating, setMigrating] = useState(false)
-  const [logoError, setLogoError] = useState(false)
-  const [mounted, setMounted] = useState(false)
+
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
   const { showToast } = useToast()
 
   useEffect(() => {
-    setMounted(true)
     const userData = localStorage.getItem('user')
     if (userData) {
       setUser(JSON.parse(userData))
@@ -57,31 +55,24 @@ export default function Navbar() {
   }
 
   return (
-    <header className="border-b border-border bg-background sticky top-0 z-50 shadow-md w-full">
+    <header className="border-b border-border bg-background/95 backdrop-blur-sm fixed top-0 left-0 right-0 z-50 shadow-md w-full">
       <div className="w-full max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8">
         <nav className="flex items-center justify-between w-full">
           <Link href={user ? "/dashboard" : "/"} className="flex items-center gap-3">
-            {mounted && !logoError ? (
-              <Image 
-                src="/logo.png" 
-                alt="MoneyTrackr Logo" 
-                width={80}
-                height={48}
-                className="h-12 w-20 rounded-lg object-contain"
-                onError={() => setLogoError(true)}
-              />
-            ) : (
-              <div className="h-8 w-8 rounded-lg bg-gradient-to-br from-blue-500 to-indigo-600 flex items-center justify-center">
-                <Wallet className="h-5 w-5 text-white" />
-              </div>
-            )}
-            <span className="text-xl font-bold text-gray-900">MoneyTrackr</span>
+            <Image 
+              src="/logo.png" 
+              alt="MoneyTrackr Logo" 
+              width={80}
+              height={48}
+              className="h-12 w-20 rounded-lg object-contain"
+            />
+            <span className="text-xl font-bold text-gray-900 dark:text-white">MoneyTrackr</span>
           </Link>
           
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1 sm:gap-3">
             {!user && (
-              <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-2 sm:px-3" asChild>
+              <Button variant="ghost" size="sm" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 px-2 sm:px-3" asChild>
                 <Link href="/">
                   <Home className="h-4 w-4 sm:mr-2" />
                   <span className="hidden sm:inline">Home</span>
@@ -91,28 +82,35 @@ export default function Navbar() {
             
             {user ? (
               <>
-                <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-2 sm:px-3" asChild>
+                <Button variant="ghost" size="sm" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 px-2 sm:px-3" asChild>
                   <Link href="/dashboard">
                     <Home className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Dashboard</span>
                   </Link>
                 </Button>
                 
-                <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-2 sm:px-3" asChild>
+                <Button variant="ghost" size="sm" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 px-2 sm:px-3" asChild>
                   <Link href="/charts">
                     <BarChart3 className="h-4 w-4 sm:mr-2" />
-                    <span className="hidden sm:inline">Charts</span>
+                    <span className="hidden sm:inline">Analytics</span>
                   </Link>
                 </Button>
                 
-                <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-2 sm:px-3" asChild>
+                <Button variant="ghost" size="sm" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 px-2 sm:px-3" asChild>
                   <Link href="/budgets">
                     <Target className="h-4 w-4 sm:mr-2" />
                     <span className="hidden sm:inline">Budgets</span>
                   </Link>
                 </Button>
                 
-                <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-2 sm:px-3" asChild>
+                <Button variant="ghost" size="sm" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 px-2 sm:px-3" asChild>
+                  <Link href="/emi">
+                    <Database className="h-4 w-4 sm:mr-2" />
+                    <span className="hidden sm:inline">EMI</span>
+                  </Link>
+                </Button>
+                
+                <Button variant="ghost" size="sm" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 px-2 sm:px-3" asChild>
                   <Link href="/tools">
                     <Settings className="h-4 w-4 mr-2" />
                     <span>Tools</span>
@@ -122,7 +120,7 @@ export default function Navbar() {
                 <Button 
                   variant="ghost" 
                   size="sm"
-                  className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-2 sm:px-3" 
+                  className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 px-2 sm:px-3" 
                   onClick={handleMigrate}
                   disabled={migrating}
                 >
@@ -158,7 +156,7 @@ export default function Navbar() {
               </>
             ) : (
               <>
-                <Button variant="ghost" size="sm" className="text-gray-700 hover:text-gray-900 hover:bg-gray-100 px-2 sm:px-3" asChild>
+                <Button variant="ghost" size="sm" className="text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white hover:bg-gray-100 dark:hover:bg-gray-800 px-2 sm:px-3" asChild>
                   <Link href="/login">Sign In</Link>
                 </Button>
                 <Button size="sm" className="bg-blue-600 hover:bg-blue-700 text-white px-2 sm:px-3" asChild>
@@ -195,13 +193,19 @@ export default function Navbar() {
                     <DropdownMenuItem asChild>
                       <Link href="/charts" className="flex items-center">
                         <BarChart3 className="mr-2 h-4 w-4" />
-                        Charts
+                        Analytics
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>
                       <Link href="/budgets" className="flex items-center">
                         <Target className="mr-2 h-4 w-4" />
                         Budgets
+                      </Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem asChild>
+                      <Link href="/emi" className="flex items-center">
+                        <Database className="mr-2 h-4 w-4" />
+                        EMI
                       </Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem asChild>

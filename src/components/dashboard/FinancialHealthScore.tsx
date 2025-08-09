@@ -152,7 +152,7 @@ export function FinancialHealthScore({ transactions, budgets, savingsGoals }: Fi
           <div className="flex items-center justify-center gap-2 mb-2">
             {getScoreIcon(healthScore)}
             <span className={`text-3xl font-bold ${getScoreColor(healthScore)}`}>
-              {healthScore}
+              {healthScore.toFixed(2)}
             </span>
             <span className="text-muted-foreground">/100</span>
           </div>

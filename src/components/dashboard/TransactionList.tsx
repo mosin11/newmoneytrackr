@@ -121,54 +121,52 @@ export function TransactionList({ transactions, onUpdate }: TransactionListProps
           </p>
         </div>
       ) : (
-      /* Desktop: 3 columns, Mobile: 1 column */
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 w-full">
+      /* Mobile: 1 column, Desktop: 3 columns */
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 w-full">
           {filteredTransactions.map((transaction) => (
-            <div key={transaction._id} className="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow w-full">
-              <div className="flex flex-col space-y-3">
-                {/* Header with type indicator and amount */}
-                <div className="flex items-center justify-between">
-                  <div className={`w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
-                    transaction.type === 'in' 
-                      ? 'bg-green-100' 
-                      : 'bg-red-100'
-                  }`}>
-                    <div className={`w-2 h-2 rounded-full ${
-                      transaction.type === 'in' ? 'bg-green-500' : 'bg-red-500'
-                    }`} />
+            <div key={transaction._id} className="bg-white border border-gray-200 rounded-lg p-3 sm:p-4 hover:shadow-md transition-shadow w-full">
+              {/* Mobile: 2 rows layout */}
+              <div className="flex flex-col gap-3 sm:space-y-3">
+                {/* Row 1: Main info */}
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-center gap-3 flex-1 min-w-0">
+                    <div className={`w-6 h-6 sm:w-8 sm:h-8 rounded-full flex items-center justify-center flex-shrink-0 ${
+                      transaction.type === 'in' 
+                        ? 'bg-green-100' 
+                        : 'bg-red-100'
+                    }`}>
+                      <div className={`w-1.5 h-1.5 sm:w-2 sm:h-2 rounded-full ${
+                        transaction.type === 'in' ? 'bg-green-500' : 'bg-red-500'
+                      }`} />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <h4 className="font-semibold text-gray-900 text-sm sm:text-base truncate">
+                        {transaction.description}
+                      </h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge 
+                          variant="outline" 
+                          className="text-xs font-medium bg-blue-50 text-blue-700 border-blue-200"
+                        >
+                          {transaction.category}
+                        </Badge>
+                        <span className="text-xs text-gray-500">
+                          {new Date(transaction.date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric'
+                          })}
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className={`font-bold text-lg ${
+                  <div className={`font-bold text-base sm:text-lg flex-shrink-0 ${
                     transaction.type === 'in' ? 'text-green-600' : 'text-red-600'
                   }`}>
                     {transaction.type === 'in' ? '+' : '-'}{formatCurrency(transaction.amount)}
                   </div>
                 </div>
                 
-                {/* Description */}
-                <div>
-                  <h4 className="font-semibold text-gray-900 text-sm break-words leading-tight">
-                    {transaction.description}
-                  </h4>
-                </div>
-                
-                {/* Category and Date */}
-                <div className="flex flex-col gap-2">
-                  <Badge 
-                    variant="outline" 
-                    className="text-xs font-medium bg-blue-50 text-blue-700 border-blue-200 w-fit"
-                  >
-                    {transaction.category}
-                  </Badge>
-                  <span className="text-xs text-gray-600 font-medium">
-                    {new Date(transaction.date).toLocaleDateString('en-US', {
-                      month: 'short',
-                      day: 'numeric',
-                      year: 'numeric'
-                    })}
-                  </span>
-                </div>
-                
-                {/* Actions */}
+                {/* Row 2: Actions */}
                 <div className="flex gap-2 pt-2 border-t border-gray-100">
                   <Button 
                     variant="outline" 
@@ -176,8 +174,8 @@ export function TransactionList({ transactions, onUpdate }: TransactionListProps
                     onClick={() => handleEdit(transaction)}
                     className="flex-1 h-8 text-xs border-blue-200 text-blue-600 hover:bg-blue-50 hover:border-blue-300"
                   >
-                    <Edit className="h-3 w-3 mr-1" />
-                    Edit
+                    <Edit className="h-3 w-3 sm:mr-1" />
+                    <span className="hidden sm:inline">Edit</span>
                   </Button>
                   <Button 
                     variant="outline" 
@@ -190,8 +188,8 @@ export function TransactionList({ transactions, onUpdate }: TransactionListProps
                       <Loader2 className="h-3 w-3 animate-spin" />
                     ) : (
                       <>
-                        <Trash2 className="h-3 w-3 mr-1" />
-                        Delete
+                        <Trash2 className="h-3 w-3 sm:mr-1" />
+                        <span className="hidden sm:inline">Delete</span>
                       </>
                     )}
                   </Button>
@@ -266,7 +264,6 @@ export function TransactionList({ transactions, onUpdate }: TransactionListProps
         </Card>
       </div>
     )}
-  
   </>
-  );
+  )
 }

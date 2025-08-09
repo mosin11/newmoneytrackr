@@ -32,12 +32,12 @@ export function QuickAddTransaction({ userEmail }: QuickAddTransactionProps) {
   }, [formData.description])
 
   const commonCategories = {
-    out: ['Food & Dining', 'Transportation', 'Shopping', 'Bills & EMI', 'Healthcare'],
-    in: ['Salary', 'Freelance', 'Investment', 'Gift', 'Other Income']
+    out: ['Food & Dining', 'Transportation', 'Shopping', 'Bills & EMI', 'Healthcare', 'Investment', 'SIP', 'EMI Payment'],
+    in: ['Salary', 'Freelance', 'Gift', 'Other Income']
   }
 
   const cashInKeywords = [
-    "salary", "income", "deposit", "refund", "cashback", "freelance", "bonus", "investment", 
+    "salary", "income", "deposit", "refund", "cashback", "freelance", "bonus", 
     "loan received", "rent income", "sales", "commission", "gift", "interest", "dividend", 
     "reimbursement", "allowance", "pension", "grants", "awards", "wages", "stipend", 
     "royalty", "advance", "settlement", "prize", "scholarship", "inheritance", "capital gain", 
@@ -46,17 +46,74 @@ export function QuickAddTransaction({ userEmail }: QuickAddTransactionProps) {
     "transfer in", "credit", "earning", "profit", "return"
   ]
 
-  const categorizeTransaction = (description: string) => {
+  const updateEMIPayment = async (description: string, amount: number) => {
+    try {
+      // Fetch user's EMIs to find matching one
+      const response = await fetch(`/api/emi?email=${userEmail}`)
+      if (response.ok) {
+        const data = await response.json()
+        const emis = data.emis || []
+        
+        // Find EMI that matches the description
+        const matchingEMI = emis.find((emi: any) => {
+          const desc = description.toLowerCase()
+          const emiName = emi.name.toLowerCase()
+          const emiCategory = emi.category.toLowerCase()
+          
+          // Check if description contains words from EMI name
+          const nameWords = emiName.split(' ').filter(word => word.length > 2)
+          const descWords = desc.split(' ').filter(word => word.length > 2)
+          
+          const hasNameMatch = nameWords.some(nameWord => 
+            descWords.some(descWord => 
+              nameWord.includes(descWord) || descWord.includes(nameWord)
+            )
+          )
+          
+          // Check if description contains category keyword
+          const categoryKeyword = emiCategory.split(' ')[0]
+          const hasCategoryMatch = categoryKeyword.length > 2 && desc.includes(categoryKeyword)
+          
+          return hasNameMatch || hasCategoryMatch
+        })
+        
+        if (matchingEMI && matchingEMI.remainingMonths > 0) {
+          // Calculate next due date
+          const nextDue = new Date(matchingEMI.nextDueDate)
+          nextDue.setMonth(nextDue.getMonth() + 1)
+          
+          // Update EMI remaining months and next due date
+          const updatedEMI = {
+            ...matchingEMI,
+            remainingMonths: Math.max(0, matchingEMI.remainingMonths - 1),
+            status: matchingEMI.remainingMonths <= 1 ? 'completed' : 'active',
+            nextDueDate: matchingEMI.remainingMonths <= 1 ? matchingEMI.nextDueDate : nextDue.toISOString()
+          }
+          
+          await fetch(`/api/emi/${matchingEMI._id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updatedEMI)
+          })
+        }
+      }
+    } catch (error) {
+      console.error('Error updating EMI:', error)
+    }
+  }
+
+  const categorizeTransaction = (description: string): { type: 'in' | 'out', category: string } => {
     const desc = description.toLowerCase()
     const isIncome = cashInKeywords.some(keyword => desc.includes(keyword))
     
     if (isIncome) {
       if (desc.includes('salary') || desc.includes('wage')) return { type: 'in', category: 'Salary' }
       if (desc.includes('freelance') || desc.includes('project')) return { type: 'in', category: 'Freelance' }
-      if (desc.includes('investment') || desc.includes('dividend')) return { type: 'in', category: 'Investment' }
       return { type: 'in', category: 'Other Income' }
     }
     
+    if (desc.includes('emi') || desc.includes('loan payment') || desc.includes('installment')) return { type: 'out', category: 'EMI Payment' }
+    if (desc.includes('investment') || desc.includes('sip') || desc.includes('mutual fund') || desc.includes('stock')) return { type: 'out', category: 'Investment' }
     if (desc.includes('food') || desc.includes('restaurant') || desc.includes('grocery')) return { type: 'out', category: 'Food & Dining' }
     if (desc.includes('transport') || desc.includes('fuel') || desc.includes('taxi')) return { type: 'out', category: 'Transportation' }
     if (desc.includes('shopping') || desc.includes('clothes') || desc.includes('electronics')) return { type: 'out', category: 'Shopping' }
@@ -85,6 +142,12 @@ export function QuickAddTransaction({ userEmail }: QuickAddTransactionProps) {
 
       if (response.ok) {
         showToast('success', 'Transaction added successfully')
+        
+        // Check if this is an EMI payment and update EMI record
+        if (formData.category === 'EMI Payment' && formData.type === 'out') {
+          await updateEMIPayment(formData.description, parseFloat(formData.amount))
+        }
+        
         setFormData({ type: 'out', amount: '', category: '', description: '' })
         setIsOpen(false)
         window.dispatchEvent(new Event('transactionAdded'))
@@ -115,13 +178,13 @@ export function QuickAddTransaction({ userEmail }: QuickAddTransactionProps) {
 
       {/* Quick Add Modal */}
       {isOpen && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <Card className="w-full max-w-md">
-            <CardContent className="p-6">
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
+          <Card className="w-full max-w-md sm:rounded-lg rounded-t-2xl rounded-b-none sm:rounded-b-lg">
+            <CardContent className="p-4 sm:p-6">
               <div className="flex items-center justify-between mb-4">
                 <h3 className="text-lg font-semibold">Quick Add Transaction</h3>
-                <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)}>
-                  <X className="h-4 w-4" />
+                <Button variant="ghost" size="sm" onClick={() => setIsOpen(false)} className="h-8 w-8 p-0">
+                  <X className="h-5 w-5" />
                 </Button>
               </div>
 
@@ -132,6 +195,7 @@ export function QuickAddTransaction({ userEmail }: QuickAddTransactionProps) {
                     placeholder="Description (e.g., 'Salary payment', 'Grocery shopping')"
                     value={formData.description}
                     onChange={(e) => setFormData({...formData, description: e.target.value})}
+                    className="h-12 text-base"
                   />
                 </div>
 
@@ -150,19 +214,20 @@ export function QuickAddTransaction({ userEmail }: QuickAddTransactionProps) {
                     placeholder="Amount (₹)"
                     value={formData.amount}
                     onChange={(e) => setFormData({...formData, amount: e.target.value})}
-                    className="text-lg"
+                    className="h-12 text-lg"
+                    inputMode="decimal"
                   />
                 </div>
 
                 {/* Category */}
                 <div>
                   <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
-                    <SelectTrigger>
+                    <SelectTrigger className="h-12">
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
                       {commonCategories[formData.type].map(category => (
-                        <SelectItem key={category} value={category}>{category}</SelectItem>
+                        <SelectItem key={category} value={category} className="py-3">{category}</SelectItem>
                       ))}
                     </SelectContent>
                   </Select>
@@ -171,11 +236,11 @@ export function QuickAddTransaction({ userEmail }: QuickAddTransactionProps) {
 
 
                 {/* Actions */}
-                <div className="flex gap-2 pt-2">
-                  <Button type="submit" disabled={loading} className="flex-1">
+                <div className="flex flex-col sm:flex-row gap-3 pt-2">
+                  <Button type="submit" disabled={loading} className="flex-1 h-12 text-base">
                     {loading ? 'Adding...' : 'Add Transaction'}
                   </Button>
-                  <Button type="button" variant="outline" onClick={() => setIsOpen(false)}>
+                  <Button type="button" variant="outline" onClick={() => setIsOpen(false)} className="h-12 text-base sm:w-auto">
                     Cancel
                   </Button>
                 </div>
