@@ -416,50 +416,47 @@ function EMIContent() {
             <CardTitle className="text-lg font-semibold">EMI Summary</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+            {/* Outstanding at top */}
+            <div className="text-center mb-4 pb-4 border-b">
+              <div className="flex flex-col items-center mb-1">
+                <AlertCircle className="h-4 w-4 text-orange-600 mb-1" />
+                <span className="text-sm font-medium text-gray-600">Total Outstanding</span>
+              </div>
+              <div className="text-2xl font-bold text-orange-600">{formatCurrency(totalOutstanding)}</div>
+            </div>
+            
+            {/* Other metrics in 2 columns */}
+            <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
               <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <TrendingDown className="h-5 w-5 text-blue-600 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Active EMIs</span>
+                <div className="flex flex-col items-center mb-1">
+                  <TrendingDown className="h-3 w-3 text-blue-600 mb-1" />
+                  <span className="text-xs font-medium text-gray-600">Active EMIs</span>
                 </div>
-                <div className="text-2xl font-bold text-blue-600">{totalActiveEMIs}</div>
-                <p className="text-xs text-muted-foreground">Currently running</p>
+                <div className="text-lg font-bold text-blue-600">{totalActiveEMIs}</div>
               </div>
               
               <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  {getCurrencyIcon()}
-                  <span className="text-sm font-medium text-gray-600 ml-2">Monthly Payment</span>
+                <div className="flex flex-col items-center mb-1">
+                  <IndianRupee className="h-3 w-3 text-red-600 mb-1" />
+                  <span className="text-xs font-medium text-gray-600">Monthly</span>
                 </div>
-                <div className="text-2xl font-bold text-red-600">{formatCurrency(totalMonthlyPayment)}</div>
-                <p className="text-xs text-muted-foreground">Total per month</p>
+                <div className="text-sm font-bold text-red-600">{formatCurrency(totalMonthlyPayment)}</div>
               </div>
               
               <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <AlertCircle className="h-5 w-5 text-orange-600 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Outstanding</span>
+                <div className="flex flex-col items-center mb-1">
+                  <IndianRupee className="h-3 w-3 text-purple-600 mb-1" />
+                  <span className="text-xs font-medium text-gray-600">Total Loan</span>
                 </div>
-                <div className="text-2xl font-bold text-orange-600">{formatCurrency(totalOutstanding)}</div>
-                <p className="text-xs text-muted-foreground">Total remaining</p>
+                <div className="text-sm font-bold text-purple-600">{formatCurrency(emis.filter(emi => emi.status === 'active').reduce((sum, emi) => sum + emi.totalAmount, 0))}</div>
               </div>
               
               <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <IndianRupee className="h-5 w-5 text-purple-600 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Total Loan</span>
+                <div className="flex flex-col items-center mb-1">
+                  <CheckCircle className="h-3 w-3 text-green-600 mb-1" />
+                  <span className="text-xs font-medium text-gray-600">Paid</span>
                 </div>
-                <div className="text-2xl font-bold text-purple-600">{formatCurrency(emis.filter(emi => emi.status === 'active').reduce((sum, emi) => sum + emi.totalAmount, 0))}</div>
-                <p className="text-xs text-muted-foreground">Total loan amount</p>
-              </div>
-              
-              <div className="text-center">
-                <div className="flex items-center justify-center mb-2">
-                  <CheckCircle className="h-5 w-5 text-green-600 mr-2" />
-                  <span className="text-sm font-medium text-gray-600">Total Paid</span>
-                </div>
-                <div className="text-2xl font-bold text-green-600">{formatCurrency(emis.filter(emi => emi.status === 'active').reduce((sum, emi) => sum + (calculateActualMonthsPaid(emi) * emi.monthlyAmount), 0))}</div>
-                <p className="text-xs text-muted-foreground">Amount paid so far</p>
+                <div className="text-sm font-bold text-green-600">{formatCurrency(emis.filter(emi => emi.status === 'active').reduce((sum, emi) => sum + (calculateActualMonthsPaid(emi) * emi.monthlyAmount), 0))}</div>
               </div>
             </div>
           </CardContent>
