@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Badge } from "@/components/ui/badge"
 import { useToast } from "@/components/ui/toast"
 import { ProtectedRoute } from "@/components/ProtectedRoute"
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog"
 
 interface EMI {
   _id: string
@@ -81,6 +82,7 @@ function EMIContent() {
   const [emis, setEmis] = useState<EMI[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [showEditModal, setShowEditModal] = useState(false)
   const [editingEMI, setEditingEMI] = useState<EMI | null>(null)
   const [formData, setFormData] = useState({
     name: '',
@@ -283,6 +285,7 @@ function EMIContent() {
       if (response.ok) {
         showToast('success', `EMI ${editingEMI ? 'updated' : 'added'} successfully`)
         setShowForm(false)
+        setShowEditModal(false)
         setEditingEMI(null)
         setFormData({
           name: '',
@@ -324,7 +327,7 @@ function EMIContent() {
       processingFee: processingFee.toString(),
       category: emi.category
     })
-    setShowForm(true)
+    setShowEditModal(true)
   }
 
   const handleDelete = async (id: string) => {
@@ -470,11 +473,11 @@ function EMIContent() {
           </Button>
         </div>
 
-        {/* Add/Edit EMI Form */}
+        {/* Add EMI Form */}
         {showForm && (
           <Card className="mb-6">
             <CardHeader className="pb-4">
-              <CardTitle className="text-lg">{editingEMI ? 'Edit EMI' : 'Add New EMI'}</CardTitle>
+              <CardTitle className="text-lg">Add New EMI</CardTitle>
             </CardHeader>
             <CardContent>
               <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -653,7 +656,6 @@ function EMIContent() {
                     className="w-full sm:w-auto px-8 py-2"
                     onClick={() => {
                       setShowForm(false)
-                      setEditingEMI(null)
                       setFormData({
                         name: '',
                         totalAmount: '',
@@ -778,6 +780,148 @@ function EMIContent() {
             ))
           )}
         </div>
+
+        {/* Edit EMI Modal */}
+        <Dialog open={showEditModal} onOpenChange={setShowEditModal}>
+          <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit EMI</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium mb-2">EMI Name *</label>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData({...formData, name: e.target.value})}
+                  placeholder="e.g., Home Loan - SBI"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Category</label>
+                <Select value={formData.category} onValueChange={(value) => setFormData({...formData, category: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories.map(cat => (
+                      <SelectItem key={cat} value={cat}>{cat}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Total Amount *</label>
+                <Input
+                  type="text"
+                  value={formData.totalAmount ? formatCurrency(parseFloat(formData.totalAmount) || 0) : ''}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[₹,]/g, '')
+                    setFormData({...formData, totalAmount: value})
+                  }}
+                  placeholder="₹10,00,000"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Monthly EMI *</label>
+                <Input
+                  type="text"
+                  value={formData.monthlyAmount ? formatCurrency(parseFloat(formData.monthlyAmount) || 0) : ''}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[₹,]/g, '')
+                    setFormData({...formData, monthlyAmount: value})
+                  }}
+                  placeholder="₹15,000"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Start Date *</label>
+                <Input
+                  type="date"
+                  value={formData.startDate}
+                  onChange={(e) => setFormData({...formData, startDate: e.target.value})}
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Disbursal Amount *</label>
+                <Input
+                  type="text"
+                  value={formData.disbursalAmount ? formatCurrency(parseFloat(formData.disbursalAmount) || 0) : ''}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[₹,]/g, '')
+                    setFormData({...formData, disbursalAmount: value})
+                    setLastUpdated('disbursal')
+                  }}
+                  placeholder="₹9,75,000"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Total Months *</label>
+                <Input
+                  type="number"
+                  value={formData.totalMonths}
+                  onChange={(e) => setFormData({...formData, totalMonths: e.target.value})}
+                  placeholder="240"
+                  required
+                />
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium mb-2">Processing Fee</label>
+                <Input
+                  type="text"
+                  value={formData.processingFee ? formatCurrency(parseFloat(formData.processingFee) || 0) : ''}
+                  onChange={(e) => {
+                    const value = e.target.value.replace(/[₹,]/g, '')
+                    setFormData({...formData, processingFee: value})
+                    setLastUpdated('processing')
+                  }}
+                  placeholder="₹10,000"
+                />
+              </div>
+
+              <div className="sm:col-span-2 flex flex-col sm:flex-row gap-3 pt-4">
+                <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto px-8 py-2">
+                  {isSubmitting ? 'Updating...' : 'Update EMI'}
+                </Button>
+                <Button 
+                  type="button" 
+                  variant="outline" 
+                  className="w-full sm:w-auto px-8 py-2"
+                  onClick={() => {
+                    setShowEditModal(false)
+                    setEditingEMI(null)
+                    setFormData({
+                      name: '',
+                      totalAmount: '',
+                      disbursalAmount: '',
+                      monthlyAmount: '',
+                      startDate: '',
+                      totalMonths: '',
+                      interestRate: '',
+                      interestRateWithoutFees: '',
+                      processingFee: '',
+                      category: 'Home Loan'
+                    })
+                    setIsCalculating(false)
+                  }}
+                >
+                  Cancel
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
     </div>
   )
