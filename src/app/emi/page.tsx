@@ -95,6 +95,8 @@ function EMIContent() {
     category: 'Home Loan'
   })
   const [isCalculating, setIsCalculating] = useState(false)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [deletingId, setDeletingId] = useState<string | null>(null)
   const [lastUpdated, setLastUpdated] = useState<'disbursal' | 'processing' | null>(null)
   const { showToast } = useToast()
 
@@ -240,12 +242,15 @@ function EMIContent() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     
+    if (isSubmitting) return
+    
     if (!formData.name || !formData.totalAmount || !formData.disbursalAmount || !formData.monthlyAmount || !formData.startDate || !formData.totalMonths) {
       showToast('error', 'Please fill all required fields')
       return
     }
 
     try {
+      setIsSubmitting(true)
       const startDate = new Date(formData.startDate)
       const endDate = new Date(startDate)
       endDate.setMonth(endDate.getMonth() + parseInt(formData.totalMonths))
@@ -298,6 +303,8 @@ function EMIContent() {
       }
     } catch (error) {
       showToast('error', `Failed to ${editingEMI ? 'update' : 'add'} EMI`)
+    } finally {
+      setIsSubmitting(false)
     }
   }
 
@@ -321,9 +328,10 @@ function EMIContent() {
   }
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this EMI?')) return
+    if (deletingId || !confirm('Are you sure you want to delete this EMI?')) return
 
     try {
+      setDeletingId(id)
       const response = await fetch(`/api/emi/${id}`, { method: 'DELETE' })
       
       if (response.ok) {
@@ -334,6 +342,8 @@ function EMIContent() {
       }
     } catch (error) {
       showToast('error', 'Failed to delete EMI')
+    } finally {
+      setDeletingId(null)
     }
   }
 
@@ -634,8 +644,8 @@ function EMIContent() {
                 </div>
 
                 <div className="sm:col-span-2 flex flex-col sm:flex-row gap-3">
-                  <Button type="submit" className="w-full sm:w-auto px-8 py-2">
-                    {editingEMI ? 'Update EMI' : 'Add EMI'}
+                  <Button type="submit" disabled={isSubmitting} className="w-full sm:w-auto px-8 py-2">
+                    {isSubmitting ? 'Saving...' : (editingEMI ? 'Update EMI' : 'Add EMI')}
                   </Button>
                   <Button 
                     type="button" 
@@ -690,8 +700,8 @@ function EMIContent() {
                       <Button variant="outline" size="sm" onClick={() => handleEdit(emi)} className="h-8 w-8 p-0">
                         <Edit className="h-3 w-3" />
                       </Button>
-                      <Button variant="outline" size="sm" onClick={() => handleDelete(emi._id)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
-                        <Trash2 className="h-3 w-3" />
+                      <Button variant="outline" size="sm" onClick={() => handleDelete(emi._id)} disabled={deletingId === emi._id} className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
+                        {deletingId === emi._id ? <div className="animate-spin h-3 w-3 border border-red-600 border-t-transparent rounded-full"></div> : <Trash2 className="h-3 w-3" />}
                       </Button>
                       <Badge className={`${getStatusColor(emi.status)} flex items-center gap-1 text-xs shrink-0`}>
                         {getStatusIcon(emi.status)}
